@@ -4,7 +4,7 @@
 
 ![I Stand With Palestine Banner](./images/PalestineBanner.svg)
 
-Muhawil is a PHP package designed to simplify the process of loading and dumping translations effortlessly. The name "muhawil" is derived from the Arabic word **مُحول**, meaning transformer or adapter.
+Muhawil is a PHP package designed to simplify the process of loading and dumping translations. The name "muhawil" is derived from the Arabic word **مُحول**, meaning transformer or adapter.
 
 The package natively supports 6 file types:
 
@@ -14,6 +14,8 @@ The package natively supports 6 file types:
 - [PO (Portable Object)](#po)
 - [XLIFF (XML Localization Interchange File Format)](#xliff)
 - [YAML](#yaml)
+
+Additionally, you can create your own [custom loaders and dumpers](#custom-loaders-and-dumpers).
 
 ## Installation
 
@@ -25,7 +27,7 @@ composer require alnaggar/muhawil
 
 ## File Loaders
 
-All files loaders extends `Alnaggar\Muhawil\Loaders\FileLoader` class, which provides the method `load (string $path)` to load the transaltions from the provided file at that path.
+All files loaders extend the `Alnaggar\Muhawil\Loaders\FileLoader` abstract class, which provides the `load (string $path)` method to load the transaltions from the specified file at that path.
 
 ```php
 # Example of loading translations from a PHP file.
@@ -39,7 +41,7 @@ $loader->load('path/to/translations/file.php');
 
 ## File Dumpers
 
-All files dumpers extends `Alnaggar\Muhawil\Dumpers\FileDumper` class, which provides the method `dump (array $translations, string $path, array $arguments [])` to dump the transaltions into the provided file at that path with the usage of the passed arguments if needed.
+All file dumpers extend the `Alnaggar\Muhawil\Dumpers\FileDumper` abstract class, which provides the `dump (array $translations, string $path, array $arguments [])` method to dump translations into the specified file at that path, using the passed arguments if needed.
 
 ```php
 // Example of dumping translations into a PHP file.
@@ -135,7 +137,7 @@ $dumper->dump($translations, 'path/to/translations/file.po', ['metadata' => [
 
 Load XLIFF translations using `Alnaggar\Muhawil\Loaders\XliffFileLoader` class.
 
-Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, with 2 required arguments `source_locale` and `target_locale` and one optional argument `legacy` which indicates to dump translation into XLIFF 1.2 version rather than 2.0 version.
+Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, with two required arguments: `source_locale` and `target_locale`. There is also an optional argument `legacy`, which, if set to `true`, will dump the translation in XLIFF 1.2 format instead of the default 2.0 format.
 
 ```php
 // Example of dumping translations into an XLIFF file.
@@ -149,14 +151,21 @@ $translations = [
 
 $dumper = new XliffFileDumper;
 
-$dumper->dump($translations, 'path/to/translations/file.xliff', ['source_locale' => 'en', 'target_locale' => 'ar', 'legacy' => true]);
+$dumper->dump($translations, 'path/to/translations/file.xliff', [
+  'source_locale' => 'en', 
+  'target_locale' => 'ar', 
+  'legacy' => true
+]);
 ```
+
+> [!NOTE]
+> If `legacy` is set to `false` (the default), there is an additional optional argument `file_id` which can be used as the `id` attribute value on the `file` node in the XLIFF 2.0 version.
 
 ## YAML
 
 Load YAML translations using `Alnaggar\Muhawil\Loaders\YamlFileLoader` class.
 
-Dump YAML translations using `Alnaggar\Muhawil\Dumpers\YamlFileDumper` class, with an optional argument `dry` which indicates to determine and generate anchors and aliases for similar **mappings**.
+Dump YAML translations using `Alnaggar\Muhawil\Dumpers\YamlFileDumper` class, with an optional `dry` argument that determines and generates anchors and aliases for similar **mappings**.
 
 ```php
 // Example of dumping translations into a YAML file.
@@ -194,7 +203,7 @@ $dumper = new YamlFileDumper;
 $dumper->dump($translations, 'path/to/translations/file.yaml', ['dry' => true]);
 ```
 
-Both the loader and the dumper supports only simple YAML structure which is mappings, nested-mappings and scalar values.
+Both the YAML loader and the dumper support only simple YAML structures, which include mappings, nested mappings, and scalar values. All keys and scalar values may be double-quoted, single-quoted, or unquoted without allowing special YAML characters.
 
 ## Custom Loaders and Dumpers
 
