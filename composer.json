@@ -1,0 +1,27 @@
+{
+    "name": "alnaggar/muhawil",
+    "description": "A php package for loading and dumping translations.",
+    "keywords": [
+        "gettext",
+        "translation",
+        "localization",
+        "i18n"
+    ],
+    "type": "library",
+    "require": {
+        "php": "^7.3|^8.0",
+        "ext-json": "*",
+        "ext-pcre": "*"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Alnaggar\\Muhawil\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ahmed muhammad rashad"
+        }
+    ]
+}
