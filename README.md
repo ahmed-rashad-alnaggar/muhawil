@@ -6,7 +6,7 @@
 
 Muhawil is a PHP package designed to simplify the process of loading and dumping translations effortlessly. The name "muhawil" is derived from the Arabic word **مُحول**, meaning transformer or adapter.
 
-The package natively supports 6 types of files:
+The package natively supports 6 file types:
 
 - [JSON](#json)
 - [MO (Machine Object)](#mo)
@@ -195,6 +195,14 @@ $dumper->dump($translations, 'path/to/translations/file.yaml', ['dry' => true]);
 ```
 
 Both the loader and the dumper supports only simple YAML structure which is mappings, nested-mappings and scalar values.
+
+## Custom Loaders and Dumpers
+
+You can implement your own loaders and dumpers for any type of storage, like a database or any other storage, by implementing the `Alnaggar\Muhawil\Interfaces\Loader` and `Alnaggar\Muhawil\Interfaces\Dumper` interfaces and their respective `load` and `dump` methods.
+
+For example, to create a custom loader for a database, you would create a class that implements the `Loader` interface and define the `load` method to fetch translations from the database. Similarly, for a custom dumper, implement the `Dumper` interface and define the `dump` method to save translations back to the database.
+
+This flexibility allows you to tailor Muhawil to your specific needs beyond the provided file-based loaders and dumpers.
 
 ## Contributing
 
