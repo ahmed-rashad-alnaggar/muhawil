@@ -2,7 +2,6 @@
 
 namespace Alnaggar\Muhawil\Dumpers;
 
-use Alnaggar\Muhawil\Exceptions\InvalidTranslationsException;
 use Alnaggar\Muhawil\Exceptions\ResourceDumpException;
 use Alnaggar\Muhawil\Exceptions\ResourceNotFoundException;
 use Alnaggar\Muhawil\Interfaces\Dumper;
@@ -50,26 +49,6 @@ abstract class FileDumper implements Dumper
         } finally {
             if (! $isDirExists) {
                 throw new ResourceNotFoundException($eMessage);
-            }
-        }
-    }
-
-    /**
-     * Check translations validity.
-     * 
-     * @param array $translations
-     * @throws \Alnaggar\Muhawil\Exceptions\InvalidTranslationsException
-     * @return void
-     */
-    protected function validateTranslations(array $translations) : void
-    {
-        foreach ($translations as $key => $value) {
-            if ($key === '') {
-                throw new InvalidTranslationsException('Translation keys must not be empty.');
-            }
-
-            if (! is_string($value)) {
-                throw new InvalidTranslationsException('Translation must be a non-nested associative array of strings.');
             }
         }
     }
