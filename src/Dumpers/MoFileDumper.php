@@ -2,8 +2,12 @@
 
 namespace Alnaggar\Muhawil\Dumpers;
 
+use Alnaggar\Muhawil\Traits\HasPluralForms;
+
 class MoFileDumper extends FileDumper
 {
+    use HasPluralForms;
+
     /**
      * The delimiter used to identify message context from the translation key.
      * If null or empty, assume none of the translations has a message context.
@@ -112,6 +116,10 @@ class MoFileDumper extends FileDumper
             'Content-Type' => 'text/plain; charset=UTF-8',
             'Content-Transfer-Encoding' => '8bit'
         ] + $metadata;
+
+        if (array_key_exists('Language', $metadata)) {
+            $metadata += ['Plural-Forms' => $this->getPluralForms($metadata['Language'])];
+        }
 
         foreach ($metadata as $key => $value) {
             $output .= "{$key}: {$value}\\n" . "\n";

@@ -19,7 +19,6 @@ abstract class FileDumper implements Dumper
     public function dump(array $translations, string $path, array $arguments = [])
     {
         $this->ensurePathExists($path);
-        $this->validateTranslations($translations);
 
         $content = $this->format($translations, $arguments);
 

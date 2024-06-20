@@ -2,8 +2,12 @@
 
 namespace Alnaggar\Muhawil\Dumpers;
 
+use Alnaggar\Muhawil\Traits\HasPluralForms;
+
 class PoFileDumper extends FileDumper
 {
+    use HasPluralForms;
+
     /**
      * The delimiter used to identify msgctxt (message context) from the translation key.
      * If null or empty, assume none of the translations has a message context (no msgctxt entity).
@@ -43,7 +47,7 @@ class PoFileDumper extends FileDumper
      */
     public function format(array $translations, array $arguments = []) : string
     {
-        return $this->formatHeader($arguments['metadata'] ?? []) . $this->formatTranslations($translations);
+        return $this->formatHeader($arguments['metadata'] ?? []) . rtrim($this->formatTranslations($translations));
     }
 
     /**
@@ -61,6 +65,10 @@ class PoFileDumper extends FileDumper
             'Content-Type' => 'text/plain; charset=UTF-8',
             'Content-Transfer-Encoding' => '8bit'
         ] + $metadata;
+
+        if (array_key_exists('Language', $metadata)) {
+            $metadata += ['Plural-Forms' => $this->getPluralForms($metadata['Language'])];
+        }
 
         $output .= "msgid \"\"" . "\n";
         $output .= "msgstr \"\"" . "\n";
