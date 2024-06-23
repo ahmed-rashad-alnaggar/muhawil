@@ -61,7 +61,7 @@ class YamlFileLoader extends FileLoader
                 //     3. Unquoted strings without allowing special characters.
                 // - Group 2 captures an optional link (anchor or alias).
                 // - Group 3 captures an optional value with three alternatives same like key.
-                if (preg_match('/^ *((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)):[ \t]*((?<=[ \t])[*&]+[a-zA-Z0-9_\-]+)?[ \t]*((?<=[ \t])(?:(?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)))?[ \t]*(?:(?<=[ \t])#.*)?$/', $line, $matches)) {
+                if (preg_match('/^ *((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)):[ \t]*((?<=[ \t])(?:&|\*)[a-zA-Z0-9_\-]+)?[ \t]*((?<=[ \t])(?:(?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)))?[ \t]*(?:(?<=[ \t])#.*)?$/', $line, $matches)) {
                     $currentIndentation = $this->getLineIndentation($line);
 
                     // Check if first line in the mapping.

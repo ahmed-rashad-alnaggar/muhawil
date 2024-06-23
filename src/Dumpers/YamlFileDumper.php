@@ -26,7 +26,7 @@ class YamlFileDumper extends FileDumper
 
         $output .= '...';
 
-        return $this->removeUnusedAnchors($output, $anchors);
+        return $this->reAnchor($output, array_keys($anchors));
     }
 
     /**
@@ -72,7 +72,7 @@ class YamlFileDumper extends FileDumper
 
             if (! in_array($arr, $anchors, true)) {
                 $isAnchor = false;
-                $anchorName = 'anchor_' . bin2hex(random_bytes(3));
+                $anchorName = count($anchors) + 1;
 
                 foreach ($arrs as $arr2) {
                     if ($arr === $arr2) {
@@ -134,7 +134,7 @@ class YamlFileDumper extends FileDumper
                 $anchorName = array_search($value, $anchors, true);
 
                 if ($anchorName) {
-                    if (in_array($anchorName, $anchored)) {
+                    if (in_array($anchorName, $anchored, true)) {
                         $output .= "{$indent}{$key}: *{$anchorName}" . "\n";
 
                         continue;
@@ -182,20 +182,24 @@ class YamlFileDumper extends FileDumper
     }
 
     /**
-     * Remove unused anchors.
+     * Remove the unused anchors then rename the rest.
      * 
      * @param string $formatted
      * @param array $anchors
      * @return string
      */
-    protected function removeUnusedAnchors(string $formatted, array $anchors) : string
+    protected function reAnchor(string $formatted, array $anchors) : string
     {
-        foreach ($anchors as $anchorName => $arr) {
-            $aliasPattern = '/^( *)((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)):[ \t]*((?<=[ \t])\*' . $anchorName . ')/m';
-            $anchorPattern = '/^( *)((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%@`]+)):[ \t]*((?<=[ \t])&' . $anchorName . ')/m';
+        $anchorId = 0;
 
-            if (! preg_match($aliasPattern, $formatted)) {
-                $formatted = preg_replace($anchorPattern, '$1$2:', $formatted);
+        foreach ($anchors as $anchor) {
+            // The pattern is adjusted for use in the sprintf function.
+            $pattern = '/^( *)((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%%@`]+)):[ \t]+(?:%s%s)/m';
+
+            if (! preg_match(sprintf($pattern, '\*', $anchor), $formatted)) {
+                $formatted = preg_replace(sprintf($pattern, '&', $anchor), '$1$2:', $formatted);
+            } else {
+                $formatted = preg_replace(sprintf($pattern, '(&|\*)', $anchor), '$1$2: $3anchor_' . ++$anchorId, $formatted);
             }
         }
 
