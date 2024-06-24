@@ -13,7 +13,7 @@ class YamlFileDumper extends FileDumper
      */
     public function format(array $translations, array $arguments = []) : string
     {
-        $output = '---' . "\n";
+        $output = '';
 
         if ($arguments['dry'] ?? true) {
             [$arrs, $hashes] = $this->getArraysAndHashes($translations);
@@ -23,8 +23,6 @@ class YamlFileDumper extends FileDumper
         } else {
             $output .= $this->formatTranslations($translations);
         }
-
-        $output .= '...';
 
         return $this->reAnchor($output, array_keys($anchors));
     }
