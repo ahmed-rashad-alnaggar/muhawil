@@ -27,7 +27,7 @@ abstract class FileLoader implements Loader
 
         $translations = $this->parse($file);
 
-        $this->handleMissingValues($translations);
+        $this->handleMissingValues($translations, $path);
 
         return $translations;
     }
@@ -65,16 +65,17 @@ abstract class FileLoader implements Loader
      * Handle missing translation values.
      * 
      * @param array $translations
+     * @param string $path
      * @return void
      */
-    protected function handleMissingValues(array &$translations) : void
+    protected function handleMissingValues(array &$translations, string $path) : void
     {
-        array_walk_recursive($translations, function (&$value, string $key) {
+        array_walk_recursive($translations, function (&$value, string $key) use ($path) {
             if ($value === '' || is_null($value)) {
                 if (is_null($this->handleMissingValueCallback)) {
                     $value = $key;
                 } else {
-                    $value = call_user_func($this->handleMissingValueCallback, $key);
+                    $value = call_user_func($this->handleMissingValueCallback, $path, $key);
                 }
             }
         });
@@ -83,7 +84,7 @@ abstract class FileLoader implements Loader
     /**
      * Set the callback that is responsible for handling missing translation values.
      * 
-     * @param callable|null $callback
+     * @param null|callable(string $path, string $key): string $callback
      * @return static
      */
     public function setMissingValueCallback(?callable $callback)

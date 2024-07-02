@@ -4,7 +4,7 @@
 
 ![I Stand With Palestine Banner](./images/PalestineBanner.svg)
 
-Muhawil is a PHP package designed to simplify the process of loading and dumping translations. The name "muhawil" is derived from the Arabic word **مُحول**, meaning transformer or adapter.
+Muhawil is a PHP package designed to simplify the process of loading and dumping translations. The name 'muhawil' is derived from the Arabic word **مُحَوِّل**, meaning transformer or adapter, as it facilitates reading and writing translations in several formats.
 
 The package natively supports 6 file types:
 
@@ -36,7 +36,32 @@ use Alnaggar\Muhawil\Loaders\PhpFileLoader;
 
 $loader = new PhpFileLoader;
 
-$loader->load('path/to/translations/file.php');
+$translations = $loader->load('path/to/translations/file.php');
+```
+
+### Handling Missing Values
+
+When the loader encounters a missing value such as when it is empty or `null` it defaults to using the translation key itself as the value. This approach ensures that the missing translations are visibly flagged in the UI for correction.
+
+To modify this behavior, you can utilize the `setMissingValueCallback (callable $callback)` function of the `FileLoader` class. This function allows you to pass a callback function that receives two parameters: the file path where the missing translation occurred and the respective translation key. The callback function is responsible for determining and returning the appropriate value.
+
+```php
+# Example of logging missing translations for later review.
+
+use Alnaggar\Muhawil\Loaders\PhpFileLoader;
+
+$loader = new PhpFileLoader;
+
+$callback = function (string $path, string $key){
+  $message = "Found an untranslated key: {$key} while loading the translations at {$path}";
+  error_log($message);
+
+  return $key;
+};
+
+$loader->setMissingValueCallback($callback);
+
+$translations = $loader->load('path/to/translations/file.php');
 ```
 
 ## File Dumpers
