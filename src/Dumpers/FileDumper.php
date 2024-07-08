@@ -79,7 +79,7 @@ abstract class FileDumper implements Dumper
         } catch (\Exception $e) {
             $eMessage .= ": {$e->getMessage()}";
         } finally {
-            if (! $isDumped) {
+            if ($isDumped === false) {
                 throw new ResourceDumpException($eMessage);
             }
         }
