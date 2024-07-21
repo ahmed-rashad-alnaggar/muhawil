@@ -20,11 +20,13 @@ class YamlFileDumper extends FileDumper
             [$anchors, $merges] = $this->getAnchorsAndMerges($arrs, $hashes);
 
             $output .= $this->formatTranslations($translations, $anchors, $merges, $hashes);
+
+            return $this->reAnchor($output, array_keys($anchors));
         } else {
             $output .= $this->formatTranslations($translations);
-        }
 
-        return $this->reAnchor($output, array_keys($anchors));
+            return $output;
+        }
     }
 
     /**
