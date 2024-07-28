@@ -17,6 +17,12 @@ The package natively supports 6 file types:
 
 Additionally, you can create your own [custom loaders and dumpers](#custom-loaders-and-dumpers).
 
+## Requirements
+
+- PHP ^7.3|^8.0
+- `ext-json` PHP extension
+- `ext-pcre` PHP extension
+
 ## Installation
 
 Install the package using Composer:
