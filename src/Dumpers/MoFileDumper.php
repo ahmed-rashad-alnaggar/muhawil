@@ -4,6 +4,9 @@ namespace Alnaggar\Muhawil\Dumpers;
 
 use Alnaggar\Muhawil\Traits\HasPluralForms;
 
+/**
+ * @method $this dump() dump(array $translations, string $path, array $metadata = []) Dump translations into the MO file at the specified path.
+ */
 class MoFileDumper extends FileDumper
 {
     use HasPluralForms;
@@ -42,12 +45,12 @@ class MoFileDumper extends FileDumper
      * Formats translations into a storable MO representation.
      *
      * @param array $translations
-     * @param array $arguments
+     * @param array $metadata
      * @return string
      */
-    public function format(array $translations, array $arguments = []) : string
+    public function format(array $translations, array $metadata = []) : string
     {
-        $metadata = $this->formatMetadata($arguments['metadata'] ?? []);
+        $metadata = $this->formatMetadata($metadata);
         $translations = ['' => $metadata] + $translations;
 
         $count = count($translations);

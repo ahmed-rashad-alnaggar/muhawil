@@ -114,7 +114,7 @@ $dumper->dump($translations, 'path/to/translations/file.json', ['flags' => JSON_
 
 Load MO translations using `Alnaggar\Muhawil\Loaders\MoFileLoader` class.
 
-Dump MO translations using `Alnaggar\Muhawil\Dumpers\MoFileDumper` class, with an optional `metadata` argument to be included in the MO file like `Language` and `Plural-Forms`.
+Dump MO translations using `Alnaggar\Muhawil\Dumpers\MoFileDumper` class, with an optional `metadata` parameter to include information in the MO file, such as `Language` and `Plural-Forms`.
 
 ```php
 // Example of dumping translations into an MO file.
@@ -128,10 +128,10 @@ $translations = [
 
 $dumper = new MoFileDumper;
 
-$dumper->dump($translations, 'path/to/translations/file.mo', ['metadata' => [
+$dumper->dump($translations, 'path/to/translations/file.mo', [
     'Language' => 'ar'
     'Plural-Forms' => 'nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5;'
-]]);
+]);
 ```
 
 ## PHP
@@ -144,7 +144,7 @@ Dump PHP translations using `Alnaggar\Muhawil\Dumpers\PhpFileDumper` class.
 
 Load PO translations using `Alnaggar\Muhawil\Loaders\PoFileLoader` class.
 
-Dump PO translations using `Alnaggar\Muhawil\Dumpers\PoFileDumper` class, with an optional `metadata` argument to be included in the PO file header like `Language` and `Plural-Forms`.
+Dump PO translations using `Alnaggar\Muhawil\Dumpers\PoFileDumper` class, with an optional `metadata` parameter to include information in the PO file header, such as `Language` and `Plural-Forms`.
 
 ```php
 // Example of dumping translations into a PO file.
@@ -168,7 +168,7 @@ $dumper->dump($translations, 'path/to/translations/file.po', ['metadata' => [
 
 Load XLIFF translations using `Alnaggar\Muhawil\Loaders\XliffFileLoader` class.
 
-Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, with two required arguments: `source_locale` and `target_locale`. There is also an optional argument `legacy`, which, if set to `true`, will dump the translation in XLIFF 1.2 format instead of the default 2.0 format.
+Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, with two required arguments: `source_locale` and `target_locale`. There is also an optional argument `legacy`, which, if set to `true`, will dump the translations in XLIFF 1.2 format instead of the default 2.0 format.
 
 ```php
 // Example of dumping translations into an XLIFF file.
