@@ -4,7 +4,7 @@
 
 ![I Stand With Palestine Banner](./images/PalestineBanner.svg)
 
-Muhawil is a PHP package designed to simplify the process of loading and dumping translations. The name 'muhawil' is derived from the Arabic word **مُحَوِّل**, meaning transformer or adapter, as it facilitates reading and writing translations in several formats.
+Muhawil is a PHP package designed to simplify the process of loading and dumping translations. The name 'Muhawil' is derived from the Arabic word "**مُحَوِّل**", meaning transformer or adapter, as it facilitates reading and writing translations in several formats.
 
 The package natively supports 6 file types:
 
@@ -19,7 +19,7 @@ Additionally, you can create your own [custom loaders and dumpers](#custom-loade
 
 ## Requirements
 
-- PHP ^7.3|^8.0
+- PHP >= 7.3
 - `ext-json` PHP extension
 - `ext-pcre` PHP extension
 
@@ -31,9 +31,9 @@ Install the package using Composer:
 composer require alnaggar/muhawil
 ```
 
-## File Loaders
+## Loading Translations
 
-All files loaders extend the `Alnaggar\Muhawil\Loaders\FileLoader` abstract class, which provides the `load (string $path)` method to load the transaltions from the specified file at that path.
+All files loaders extend the `Alnaggar\Muhawil\Loaders\FileLoader` abstract class, which provides the `load (string $path)` method to load the transaltions from the specified file.
 
 ```php
 # Example of loading translations from a PHP file.
@@ -45,11 +45,16 @@ $loader = new PhpFileLoader;
 $translations = $loader->load('path/to/translations/file.php');
 ```
 
-### Handling Missing Values
+### Handling Missing Translation Values
 
-When the loader encounters a missing value such as when it is empty or `null` it defaults to using the translation key itself as the value. This approach ensures that the missing translations are visibly flagged in the UI for correction.
+The `FileLoader` class uses the `Alnaggar\Muhawil\Traits\HasMissingTranslationValueHandler` trait. By default, if a translation value is missing (empty or `null`), the translation **key** itself is returned. This makes missing translations are visibly flagged in the UI for correction.
 
-To modify this behavior, you can utilize the `setMissingValueCallback (callable $callback)` function of the `FileLoader` class. This function allows you to pass a callback function that receives two parameters: the file path where the missing translation occurred and the respective translation key. The callback function is responsible for determining and returning the appropriate value.
+To override this behavior, pass a callback to `setMissingTranslationValueCallback()` which receives:
+
+- The translation `$key`.
+- `$path` (only for `FileLoader` classes).
+
+The callback function is responsible for determining and returning the appropriate value.
 
 ```php
 # Example of logging missing translations for later review.
@@ -58,10 +63,11 @@ use Alnaggar\Muhawil\Loaders\PhpFileLoader;
 
 $loader = new PhpFileLoader;
 
-$callback = function (string $path, string $key){
+$callback = function (string $key, string $path) {
   $message = "Found an untranslated key: {$key} while loading the translations at {$path}";
   error_log($message);
 
+  // Return the key as the translation value so it can be visibly flagged for correction.
   return $key;
 };
 
@@ -70,9 +76,73 @@ $loader->setMissingValueCallback($callback);
 $translations = $loader->load('path/to/translations/file.php');
 ```
 
-## File Dumpers
+## Dumping Translations
 
-All file dumpers extend the `Alnaggar\Muhawil\Dumpers\FileDumper` abstract class, which provides the `dump (array $translations, string $path, array $arguments [])` method to dump translations into the specified file at that path, using the passed arguments if needed.
+All file dumpers extend the `Alnaggar\Muhawil\Dumpers\FileDumper` abstract class, and each has its own `dump()` method signature as described in each section below.
+
+## JSON
+
+Load JSON translations using `Alnaggar\Muhawil\Loaders\JsonFileLoader` class.
+
+Dump JSON translations using `Alnaggar\Muhawil\Dumpers\JsonFileDumper` class, using its `dump(array $translations, string $path, int $flags = JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT): static` method.
+
+- `$flags`: A bitmask that controls the behavior of the JSON encoding process.
+
+```php
+// Example of dumping translations into a JSON file.
+
+use Alnaggar\Muhawil\Dumpers\JsonFileDumper;
+
+$translations = [
+    'welcome' => 'Welcome to our website!',
+    'farewell' => 'Wishing you success on your new journey. Farewell!'
+];
+
+$dumper = new JsonFileDumper;
+
+$dumper->dump($translations, 'path/to/translations/file.json', JSON_PRETTY_PRINT | JSON_INVALID_UTF8_IGNORE);
+```
+
+## MO
+
+Load MO translations using `Alnaggar\Muhawil\Loaders\MoFileLoader` class.
+
+Dump MO translations using `Alnaggar\Muhawil\Dumpers\MoFileDumper` class, using its `dump(array $translations, string $path, array $metadata = []): static` method.
+
+- `$metadata`: An associative array to include additional information about the translation file, such as language, authorship, or pluralization rules.
+
+The dumper uses the `Alnaggar\Muhawil\Traits\HasPluralForms` trait, to automatically generates the `Plural-Forms` metadata if the `Language` metadata is provided and `Plural-Forms` is not explicitly set.
+
+Both The MO loader and dumper constructors accept two optional parameters:
+
+- `?string $contextDelimiter = '::'`: Delimiter for message context in translation keys.
+
+- `?string $pluralDelimiter = '|'`: Delimiter for pluralization in translation keys and values.
+
+```php
+// Example of dumping translations into an MO file.
+
+use Alnaggar\Muhawil\Dumpers\MoFileDumper;
+
+$translations = [
+    'welcome' => 'Welcome to our website!',
+    'farewell' => 'Wishing you success on your new journey. Farewell!'
+];
+
+$metadata  = [
+    'Language' => 'ar',
+];
+
+$dumper = new MoFileDumper;
+
+$dumper->dump($translations, 'path/to/translations/file.mo', $metadata);
+```
+
+## PHP
+
+Load PHP translations using `Alnaggar\Muhawil\Loaders\PhpFileLoader` class.
+
+Dump PHP translations using `Alnaggar\Muhawil\Dumpers\PhpFileDumper` class, using its `dump(array $translations, string $path): static` method.
 
 ```php
 // Example of dumping translations into a PHP file.
@@ -89,62 +159,21 @@ $dumper = new PhpFileDumper;
 $dumper->dump($translations, 'path/to/translations/file.php');
 ```
 
-## JSON
-
-Load JSON translations using `Alnaggar\Muhawil\Loaders\JsonFileLoader` class.
-
-Dump JSON translations using `Alnaggar\Muhawil\Dumpers\JsonFileDumper` class, with an optional `flags` argument to be passed to the `json_encode` function.
-
-```php
-// Example of dumping translations into a JSON file.
-
-use Alnaggar\Muhawil\Dumpers\JsonFileDumper;
-
-$translations = [
-    'welcome' => 'Welcome to our website!',
-    'farewell' => 'Wishing you success on your new journey. Farewell!'
-];
-
-$dumper = new JsonFileDumper;
-
-$dumper->dump($translations, 'path/to/translations/file.json', ['flags' => JSON_PRETTY_PRINT | JSON_INVALID_UTF8_IGNORE]);
-```
-
-## MO
-
-Load MO translations using `Alnaggar\Muhawil\Loaders\MoFileLoader` class.
-
-Dump MO translations using `Alnaggar\Muhawil\Dumpers\MoFileDumper` class, with an optional `metadata` parameter to include information in the MO file, such as `Language` and `Plural-Forms`.
-
-```php
-// Example of dumping translations into an MO file.
-
-use Alnaggar\Muhawil\Dumpers\MoFileDumper;
-
-$translations = [
-    'welcome' => 'Welcome to our website!',
-    'farewell' => 'Wishing you success on your new journey. Farewell!'
-];
-
-$dumper = new MoFileDumper;
-
-$dumper->dump($translations, 'path/to/translations/file.mo', [
-    'Language' => 'ar'
-    'Plural-Forms' => 'nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5;'
-]);
-```
-
-## PHP
-
-Load PHP translations using `Alnaggar\Muhawil\Loaders\PhpFileLoader` class.
-
-Dump PHP translations using `Alnaggar\Muhawil\Dumpers\PhpFileDumper` class.
-
 ## PO
 
 Load PO translations using `Alnaggar\Muhawil\Loaders\PoFileLoader` class.
 
-Dump PO translations using `Alnaggar\Muhawil\Dumpers\PoFileDumper` class, with an optional `metadata` parameter to include information in the PO file header, such as `Language` and `Plural-Forms`.
+Dump PO translations using `Alnaggar\Muhawil\Dumpers\PoFileDumper` class, using its `dump(array $translations, string $path, array $metadata = []): static` method.
+
+- `$metadata`: An associative array to include additional information about the translation file, such as language, authorship, or pluralization rules.
+
+The dumper uses the `Alnaggar\Muhawil\Traits\HasPluralForms` trait, to automatically generates the `Plural-Forms` metadata if the `Language` metadata is provided and `Plural-Forms` is not explicitly set.
+
+Both The PO loader and dumper constructors accept two optional parameters:
+
+- `?string $contextDelimiter = '::'`: Delimiter for message context in translation keys.
+
+- `?string $pluralDelimiter = '|'`: Delimiter for pluralization in translation keys and values.
 
 ```php
 // Example of dumping translations into a PO file.
@@ -156,19 +185,28 @@ $translations = [
     'farewell' => 'Wishing you success on your new journey. Farewell!'
 ];
 
+$metadata  = [
+    'Language' => 'ar',
+];
+
 $dumper = new PoFileDumper;
 
-$dumper->dump($translations, 'path/to/translations/file.po', [
-    'Language' => 'ar'
-    'Plural-Forms' => 'nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n % 100 >= 3 && n % 100 <= 10 ? 3 : n % 100 >= 11 ? 4 : 5;'
-]);
+$dumper->dump($translations, 'path/to/translations/file.po', $metadata);
 ```
 
 ## XLIFF
 
 Load XLIFF translations using `Alnaggar\Muhawil\Loaders\XliffFileLoader` class.
 
-Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, with two required arguments: `source_locale` and `target_locale`. There is also an optional argument `legacy`, which, if set to `true`, will dump the translations in XLIFF 1.2 format instead of the default 2.0 format.
+Dump XLIFF translations using `Alnaggar\Muhawil\Dumpers\XliffFileDumper` class, using its `dump(array $translations, string $path, string $sourceLocale = 'en', string $targetLocale = 'en', bool $legacy = false, string $fileId = 'f1'): static` method.
+
+- `$sourceLocale`: Specifies the source language of the translations.
+
+- `$targetLocale`: Specifies the target language of the translations.
+
+- `$legacy`: Determines whether to confrom to XLIFF 1.2 (`true`) or XLIFF 2.0 (`false`).
+
+- `$fileId`: When `$legacy` is set to `false` (indicating XLIFF 2.0), this parameter is used to specify the `id` attribute for the `<file>` node in the XLIFF 2.0 structure.
 
 ```php
 // Example of dumping translations into an XLIFF file.
@@ -182,21 +220,16 @@ $translations = [
 
 $dumper = new XliffFileDumper;
 
-$dumper->dump($translations, 'path/to/translations/file.xliff', [
-  'source_locale' => 'en', 
-  'target_locale' => 'ar', 
-  'legacy' => true
-]);
+$dumper->dump($translations, 'path/to/translations/file.', 'en', 'en', false);
 ```
-
-> [!NOTE]
-> If `legacy` is set to `false` (the default), there is an additional optional argument `file_id` which can be used as the `id` attribute value on the `file` node in the XLIFF 2.0 version.
 
 ## YAML
 
 Load YAML translations using `Alnaggar\Muhawil\Loaders\YamlFileLoader` class.
 
-Dump YAML translations using `Alnaggar\Muhawil\Dumpers\YamlFileDumper` class, with an optional `dry` argument that determines and generates anchors and aliases for similar **mappings**.
+Dump YAML translations using `Alnaggar\Muhawil\Dumpers\YamlFileDumper` class, using its `dump(array $translations, string $path, bool $dry = true): static` method.
+
+- `$dry`: Determines whether to generate anchors and aliases for similar **mappings** in the YAML structure.
 
 ```php
 // Example of dumping translations into a YAML file.
@@ -208,33 +241,33 @@ $translations = [
     'greeting' => 'Hello, world!',
     'farewell' => 'Goodbye, see you soon!',
     'errors' => [
-      'not_found' => 'The requested resource was not found.',
-      'internal_error' => 'An internal server error occurred. Please try again later.'
+        'not_found' => 'The requested resource was not found.',
+        'internal_error' => 'An internal server error occurred. Please try again later.'
     ],
     'common_actions' => [
-      'save' => 'Save',
-      'cancel' => 'Cancel',
-      'delete' => 'Delete'
-    ],
-    'user' => [
-      'profile' => 'Profile',
-      'settings' => 'Settings',
-      'logout' => 'Logout',
-      'actions' => [
-        'create' => 'Create',
         'save' => 'Save',
         'cancel' => 'Cancel',
         'delete' => 'Delete'
-      ]
+    ],
+    'user' => [
+        'profile' => 'Profile',
+        'settings' => 'Settings',
+        'logout' => 'Logout',
+        'actions' => [
+            'create' => 'Create',
+            'save' => 'Save',
+            'cancel' => 'Cancel',
+            'delete' => 'Delete'
+        ]
     ]
 ];
 
 $dumper = new YamlFileDumper;
 
-$dumper->dump($translations, 'path/to/translations/file.yaml', ['dry' => true]);
+$dumper->dump($translations, 'path/to/translations/file.yaml', true);
 ```
 
-Both the YAML loader and the dumper support only simple YAML structures, which include mappings, nested mappings, and scalar values. All keys and scalar values may be double-quoted, single-quoted, or unquoted without allowing special YAML characters.
+Both the YAML loader and dumper support only simple YAML structures, including mappings, nested mappings, and scalar values. Keys and scalar values may be double-quoted, single-quoted, or unquoted (as long as they do not contain special YAML characters).
 
 ## Custom Loaders and Dumpers
 

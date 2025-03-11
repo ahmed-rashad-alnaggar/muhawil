@@ -5,15 +5,11 @@ namespace Alnaggar\Muhawil\Loaders;
 use Alnaggar\Muhawil\Exceptions\ResourceLoadException;
 use Alnaggar\Muhawil\Exceptions\ResourceNotFoundException;
 use Alnaggar\Muhawil\Interfaces\Loader;
+use Alnaggar\Muhawil\Traits\HasMissingTranslationValueHandler;
 
 abstract class FileLoader implements Loader
 {
-    /**
-     * The callback that is responsible for handling missing translation values.
-     * 
-     * @var callable|null
-     */
-    protected $handleMissingValueCallback;
+    use HasMissingTranslationValueHandler;
 
     /**
      * Load translations from the file at the specified path.
@@ -21,13 +17,13 @@ abstract class FileLoader implements Loader
      * @param string $path
      * @return array
      */
-    public function load(string $path) : array
+    public function load(string $path): array
     {
         $file = $this->loadFile($path);
 
         $translations = $this->parse($file);
 
-        $this->handleMissingValues($translations, $path);
+        $this->handleMissingTranslationsValues($translations, $path);
 
         return $translations;
     }
@@ -42,7 +38,7 @@ abstract class FileLoader implements Loader
      */
     protected function loadFile(string $path)
     {
-        if (! is_file($path)) {
+        if (!is_file($path)) {
             throw new ResourceNotFoundException("File does not exist at path '{$path}'.");
         }
 
@@ -59,7 +55,7 @@ abstract class FileLoader implements Loader
      * @param mixed $resource
      * @return array
      */
-    abstract protected function parse($resource) : array;
+    abstract protected function parse($resource): array;
 
     /**
      * Handle missing translation values.
@@ -68,29 +64,16 @@ abstract class FileLoader implements Loader
      * @param string $path
      * @return void
      */
-    protected function handleMissingValues(array &$translations, string $path) : void
+    protected function handleMissingTranslationsValues(array &$translations, string $path): void
     {
         array_walk_recursive($translations, function (&$value, string $key) use ($path) {
             if ($value === '' || is_null($value)) {
-                if (is_null($this->handleMissingValueCallback)) {
+                if (is_null($this->handleMissingTranslationValueCallback)) {
                     $value = $key;
                 } else {
-                    $value = call_user_func($this->handleMissingValueCallback, $path, $key);
+                    $value = call_user_func($this->handleMissingTranslationValueCallback, $key, $path);
                 }
             }
         });
-    }
-
-    /**
-     * Set the callback that is responsible for handling missing translation values.
-     * 
-     * @param null|callable(string $path, string $key): string $callback
-     * @return static
-     */
-    public function setMissingValueCallback(?callable $callback)
-    {
-        $this->handleMissingValueCallback = $callback;
-
-        return $this;
     }
 }

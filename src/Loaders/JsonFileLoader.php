@@ -13,7 +13,7 @@ class JsonFileLoader extends FileLoader
      * @throws \Alnaggar\Muhawil\Exceptions\ResourceParsingException
      * @return array
      */
-    protected function parse($resource) : array
+    protected function parse($resource): array
     {
         try {
             $content = $resource->fread($resource->getSize());

@@ -13,12 +13,12 @@ class YamlFileLoader extends FileLoader
      * @param \SplFileObject $resource
      * @return array
      */
-    protected function parse($resource) : array
+    protected function parse($resource): array
     {
         $filepath = $resource->getRealPath();
         $lines = $resource->fread($resource->getSize());
 
-        if (! preg_match('//u', $lines)) {
+        if (!preg_match('//u', $lines)) {
             throw new InvalidResourceException("The YAML file at '{$filepath}' must be UTF-8 encoded.");
         }
 
@@ -46,14 +46,14 @@ class YamlFileLoader extends FileLoader
      * @throws \Alnaggar\Muhawil\Exceptions\ResourceParsingException
      * @return array
      */
-    protected function parseLines(array &$lines, array &$anchors = [], int $parentIndentation = 0, int &$lineNumber = 0) : array
+    protected function parseLines(array &$lines, array &$anchors = [], int $parentIndentation = 0, int &$lineNumber = 0): array
     {
         $translations = [];
         $mergeKeyTranslations = [];
         $hierarchyIndentation = -1;
 
-        while (! empty($lines)) {
-            if (! is_null($line = $this->getNextLine($lines, $lineNumber))) {
+        while (!empty($lines)) {
+            if (!is_null($line = $this->getNextLine($lines, $lineNumber))) {
                 // Regular expression to match a valid translation line and capture groups.
                 // - Group 1 captures the key with three alternatives:
                 //     1. Double-quoted strings.
@@ -102,9 +102,9 @@ class YamlFileLoader extends FileLoader
                         if ($linkType === '&') {
                             $anchors[$linkId] = &$translations[$key];
                         } else {
-                            if (! is_null($value)) {
+                            if (!is_null($value)) {
                                 throw new InvalidResourceException("The YAML file at '%s' has an invalid combination of an alias and value detected at line {$lineNumber}.");
-                            } elseif (! array_key_exists($linkId, $anchors)) {
+                            } elseif (!array_key_exists($linkId, $anchors)) {
                                 throw new InvalidResourceException("The YAML file at '%s' references a non-existent anchor '{$linkId}' detected at line {$lineNumber}.");
                             } elseif ($this->isNextLineExpectsMapping($lines, $lineNumber, $hierarchyIndentation)) {
                                 if ($isMergeKey) {
@@ -113,7 +113,7 @@ class YamlFileLoader extends FileLoader
                                     throw new InvalidResourceException("The YAML file at '%s' expects a mapping at line {$lineNumber}, but found an alias.");
                                 }
                             } elseif ($isMergeKey) {
-                                if (! is_array($anchors[$linkId])) {
+                                if (!is_array($anchors[$linkId])) {
                                     throw new InvalidResourceException("The YAML file at '%s' expected an alias at line {$lineNumber} that refers to a mapping for merging.");
                                 } else {
                                     unset($translations[$key]);
@@ -152,9 +152,9 @@ class YamlFileLoader extends FileLoader
      * @param int $hierarchyIndentation
      * @return bool
      */
-    protected function isNextLineExpectsMapping(array &$lines, int &$lineNumber, int $hierarchyIndentation) : bool
+    protected function isNextLineExpectsMapping(array &$lines, int &$lineNumber, int $hierarchyIndentation): bool
     {
-        if (! is_null($nextLine = $this->getNextLine($lines, $lineNumber))) {
+        if (!is_null($nextLine = $this->getNextLine($lines, $lineNumber))) {
             $this->revertPreviousLine($lines, $lineNumber, $nextLine);
 
             if ($this->getLineIndentation($nextLine) > $hierarchyIndentation) {
@@ -172,14 +172,14 @@ class YamlFileLoader extends FileLoader
      * @param int $lineNumber
      * @return string|null
      */
-    protected function getNextLine(array &$lines, int &$lineNumber) : ?string
+    protected function getNextLine(array &$lines, int &$lineNumber): ?string
     {
-        while (! empty($lines)) {
+        while (!empty($lines)) {
             $lineNumber++;
             $line = array_shift($lines);
 
             // Skip empty lines, comments, tag, and document markers.
-            if (! preg_match('/^ *(?:$|%|#|---|\.\.\.)/', $line)) {
+            if (!preg_match('/^ *(?:$|%|#|---|\.\.\.)/', $line)) {
                 return $line;
             }
         }
@@ -195,7 +195,7 @@ class YamlFileLoader extends FileLoader
      * @param string $line
      * @return void
      */
-    protected function revertPreviousLine(array &$lines, int &$lineNumber, string $line) : void
+    protected function revertPreviousLine(array &$lines, int &$lineNumber, string $line): void
     {
         $lineNumber--;
         array_unshift($lines, $line);
@@ -207,7 +207,7 @@ class YamlFileLoader extends FileLoader
      * @param string $line
      * @return int
      */
-    protected function getLineIndentation(string $line) : int
+    protected function getLineIndentation(string $line): int
     {
         return strlen($line) - strlen(ltrim($line, ' '));
     }
@@ -218,7 +218,7 @@ class YamlFileLoader extends FileLoader
      * @param string $key
      * @return string
      */
-    protected function parseKey(string $key) : string
+    protected function parseKey(string $key): string
     {
         // If the value is null, the key is '~' or literally 'null' respecting case sensitivity.
         return $this->parseValue($key) ?? rtrim($key, " \t");
@@ -230,7 +230,7 @@ class YamlFileLoader extends FileLoader
      * @param string $value
      * @return string|null
      */
-    protected function parseValue(string $value) : ?string
+    protected function parseValue(string $value): ?string
     {
         if (strncmp($value, '"', 1) === 0) {
             return stripcslashes(substr($value, 1, -1));

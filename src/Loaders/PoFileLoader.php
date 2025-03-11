@@ -38,13 +38,13 @@ class PoFileLoader extends FileLoader
      * @param \SplFileObject $resource
      * @return array
      */
-    protected function parse($resource) : array
+    protected function parse($resource): array
     {
         $translations = [];
         $key = $value = '';
         $lastLineType = ''; // Helper to ignore header and comments.
 
-        while (! $resource->eof()) {
+        while (!$resource->eof()) {
             $line = trim($resource->fgets()); // Remove whitespace and newline sequence around the line.
 
             // Empty line means the end of the current unit.
@@ -81,7 +81,7 @@ class PoFileLoader extends FileLoader
      * @param string $lastLineType
      * @return string
      */
-    protected function parseLine(string $line, string &$key, string &$value, string $lastLineType) : string
+    protected function parseLine(string $line, string &$key, string &$value, string $lastLineType): string
     {
         // Regular expression to match a valid translation line and capture groups.
         // - Group 1 captures the identifier (msgctxt, msgid, msgid_plural, msgstr, msgstr[\d+], none if spaned-line).
@@ -95,7 +95,7 @@ class PoFileLoader extends FileLoader
             $lastLineType = $id ?: $lastLineType;
 
             if ($id === 'msgctxt') {
-                if (! is_null($this->contextDelimeter)) { // Check if msgctxt can be added to the key.
+                if (!is_null($this->contextDelimeter)) { // Check if msgctxt can be added to the key.
                     if ($str !== '') {
                         $key = "{$str}{$this->contextDelimeter}";
                     }
@@ -108,7 +108,7 @@ class PoFileLoader extends FileLoader
                 $value = $str;
             } elseif (empty($id)) { // spaned-line case
                 if ($lastLineType === 'msgctxt') {
-                    if (! is_null($this->contextDelimeter)) {
+                    if (!is_null($this->contextDelimeter)) {
                         if ($str !== '') {
                             if ($key === '') {
                                 $key = "{$str}{$this->contextDelimeter}";

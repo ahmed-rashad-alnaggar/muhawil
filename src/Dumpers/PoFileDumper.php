@@ -5,7 +5,7 @@ namespace Alnaggar\Muhawil\Dumpers;
 use Alnaggar\Muhawil\Traits\HasPluralForms;
 
 /**
- * @method $this dump() dump(array $translations, string $path, array $metadata = []) Dump translations into the PO file at the specified path.
+ * @method $this dump() dump(array $translations, string $path, array $metadata = []) Dump translations into the specified PO file.
  */
 class PoFileDumper extends FileDumper
 {
@@ -48,7 +48,7 @@ class PoFileDumper extends FileDumper
      * @param array $metadata
      * @return string
      */
-    public function format(array $translations, array $metadata = []) : string
+    public function format(array $translations, array $metadata = []): string
     {
         return $this->formatHeader($metadata) . rtrim($this->formatTranslations($translations));
     }
@@ -59,7 +59,7 @@ class PoFileDumper extends FileDumper
      * @param array $metadata
      * @return string
      */
-    protected function formatHeader(array $metadata) : string
+    protected function formatHeader(array $metadata): string
     {
         $output = '';
 
@@ -89,14 +89,14 @@ class PoFileDumper extends FileDumper
      * @param array $translations
      * @return string
      */
-    protected function formatTranslations(array $translations) : string
+    protected function formatTranslations(array $translations): string
     {
         $output = '';
 
         foreach ($translations as $key => $value) {
             $output .= "\n";
 
-            if (! is_null($this->contextDelimiter)) {
+            if (!is_null($this->contextDelimiter)) {
                 $ctxtAndId = explode($this->contextDelimiter, $key, 2);
 
                 if (count($ctxtAndId) === 2) {
@@ -108,7 +108,7 @@ class PoFileDumper extends FileDumper
                 $key = end($ctxtAndId);
             }
 
-            if (! is_null($this->pluralDelimiter)) {
+            if (!is_null($this->pluralDelimiter)) {
                 $ids = explode($this->pluralDelimiter, $key);
                 $strs = explode($this->pluralDelimiter, $value);
 
@@ -145,7 +145,7 @@ class PoFileDumper extends FileDumper
      * @param string $value
      * @return string
      */
-    protected function formatValue(string $value) : string
+    protected function formatValue(string $value): string
     {
         return '"' . addcslashes($value, "\0..\37\42\134") . '"';
     }

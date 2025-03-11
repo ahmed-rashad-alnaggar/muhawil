@@ -13,12 +13,12 @@ class PhpFileLoader extends FileLoader
      * @throws \Alnaggar\Muhawil\Exceptions\ResourceParsingException
      * @return array
      */
-    protected function parse($resource) : array
+    protected function parse($resource): array
     {
         $filepath = $resource->getRealPath();
         $translations = require $filepath;
 
-        if (! is_array($translations)) {
+        if (!is_array($translations)) {
             throw new ResourceParsingException("The PHP file at '{$filepath}' did not return an array of translations.");
         }
 

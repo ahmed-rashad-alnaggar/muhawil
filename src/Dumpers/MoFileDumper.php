@@ -5,7 +5,7 @@ namespace Alnaggar\Muhawil\Dumpers;
 use Alnaggar\Muhawil\Traits\HasPluralForms;
 
 /**
- * @method $this dump() dump(array $translations, string $path, array $metadata = []) Dump translations into the MO file at the specified path.
+ * @method $this dump() dump(array $translations, string $path, array $metadata = []) Dump translations into the specified MO file.
  */
 class MoFileDumper extends FileDumper
 {
@@ -48,7 +48,7 @@ class MoFileDumper extends FileDumper
      * @param array $metadata
      * @return string
      */
-    public function format(array $translations, array $metadata = []) : string
+    public function format(array $translations, array $metadata = []): string
     {
         $metadata = $this->formatMetadata($metadata);
         $translations = ['' => $metadata] + $translations;
@@ -71,12 +71,12 @@ class MoFileDumper extends FileDumper
         $offsets = [];
 
         foreach ($translations as $original => $translation) {
-            if (! is_null($this->contextDelimiter)) {
+            if (!is_null($this->contextDelimiter)) {
                 $original = explode($this->contextDelimiter, $original, 2);
                 $original = implode("\x04", $original);
             }
 
-            if (! is_null($this->pluralDelimiter)) {
+            if (!is_null($this->pluralDelimiter)) {
                 $original = explode($this->pluralDelimiter, $original);
                 $original = implode("\x00", $original);
 
@@ -110,7 +110,7 @@ class MoFileDumper extends FileDumper
      * @param array $metadata
      * @return string
      */
-    protected function formatMetadata(array $metadata) : string
+    protected function formatMetadata(array $metadata): string
     {
         $output = '';
 

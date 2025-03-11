@@ -43,7 +43,7 @@ class MoFileLoader extends FileLoader
      * @throws \Alnaggar\Muhawil\Exceptions\InvalidResourceException
      * @return array
      */
-    protected function parse($resource) : array
+    protected function parse($resource): array
     {
         $filepath = $resource->getRealPath();
         $format = 'V';
@@ -73,7 +73,7 @@ class MoFileLoader extends FileLoader
      * @param string $format
      * @return array
      */
-    protected function parseHeader(\SplFileObject $resource, string $format) : array
+    protected function parseHeader(\SplFileObject $resource, string $format): array
     {
         return unpack(
             "{$format}formatRevision/{$format}numStrings/{$format}originalsTableOffset/{$format}translationsTableOffset/{$format}hashTableSize/{$format}hashTableOffset",
@@ -89,7 +89,7 @@ class MoFileLoader extends FileLoader
      * @param string $format
      * @return array
      */
-    protected function parseTranslations(\SplFileObject $resource, array $header, string $format) : array
+    protected function parseTranslations(\SplFileObject $resource, array $header, string $format): array
     {
         $translations = [];
 

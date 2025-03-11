@@ -2,33 +2,30 @@
 
 namespace Alnaggar\Muhawil\Dumpers;
 
+/**
+ * @method $this dump() dump(array $translations, string $path, string $sourceLocale = 'en', string $targetLocale = 'en', bool $legacy = false, string $fileId = 'f1') Dump translations into the specified XLIFF file.
+ */
 class XliffFileDumper extends FileDumper
 {
     /**
      * Formats translations into a storable XLIFF representation.
-     *
+     * 
      * @param array $translations
-     * @param array $arguments
-     * @throws \InvalidArgumentException
+     * @param string $sourceLocale
+     * @param string $targetLocale
+     * @param bool $legacy
+     * @param string $fileId
      * @return string
      */
-    public function format(array $translations, array $arguments = []) : string
+    public function format(array $translations, string $sourceLocale = 'en', string $targetLocale = 'en', bool $legacy = false, string $fileId = 'f1'): string
     {
-        if (! array_key_exists('source_locale', $arguments)) {
-            throw new \InvalidArgumentException("Source locale must be specified.");
-        }
+        $sourceLocale = str_replace('_', '-', $sourceLocale);
+        $targetLocale = str_replace('_', '-', $targetLocale);
 
-        if (! array_key_exists('target_locale', $arguments)) {
-            throw new \InvalidArgumentException("Target locale must be specified.");
-        }
-
-        $arguments['source_locale'] = str_replace('_', '-', $arguments['source_locale']);
-        $arguments['target_locale'] = str_replace('_', '-', $arguments['target_locale']);
-
-        if ($arguments['legacy'] ?? false) {
-            return $this->formatLegacy($translations, $arguments);
+        if ($legacy) {
+            return $this->formatLegacy($translations, $sourceLocale, $targetLocale);
         } else {
-            return $this->formatStandard($translations, $arguments);
+            return $this->formatStandard($translations, $sourceLocale, $targetLocale, $fileId);
         }
     }
 
@@ -36,10 +33,11 @@ class XliffFileDumper extends FileDumper
      * Formats translations into a storable XLIFF 1.2 representation.
      *
      * @param array $translations
-     * @param array $arguments
+     * @param string $sourceLocale
+     * @param string $targetLocale
      * @return string
      */
-    protected function formatLegacy(array $translations, array $arguments) : string
+    protected function formatLegacy(array $translations, string $sourceLocale, string $targetLocale): string
     {
         $dom = new \DOMDocument('1.0', 'utf-8');
         $dom->formatOutput = true;
@@ -49,8 +47,8 @@ class XliffFileDumper extends FileDumper
         $xliff->setAttribute('version', '1.2');
 
         $file = $xliff->appendChild($dom->createElement('file'));
-        $file->setAttribute('source-language', $arguments['source_locale']);
-        $file->setAttribute('target-language', $arguments['target_locale']);
+        $file->setAttribute('source-language', $sourceLocale);
+        $file->setAttribute('target-language', $targetLocale);
         $file->setAttribute('datatype', 'plaintext');
         $file->setAttribute('original', 'file.ext');
 
@@ -80,10 +78,12 @@ class XliffFileDumper extends FileDumper
      * Formats translations into a storable XLIFF 2.0 representation.
      *
      * @param array $translations
-     * @param array $arguments
+     * @param string $sourceLocale
+     * @param string $targetLocale
+     * @param string $fileId
      * @return string
      */
-    protected function formatStandard(array $translations, array $arguments) : string
+    protected function formatStandard(array $translations, string $sourceLocale, string $targetLocale, string $fileId): string
     {
         $dom = new \DOMDocument('1.0', 'utf-8');
         $dom->formatOutput = true;
@@ -91,11 +91,11 @@ class XliffFileDumper extends FileDumper
         $xliff = $dom->appendChild($dom->createElement('xliff'));
         $xliff->setAttribute('xmlns', 'urn:oasis:names:tc:xliff:document:2.0');
         $xliff->setAttribute('version', '2.0');
-        $xliff->setAttribute('srcLang', $arguments['source_locale']);
-        $xliff->setAttribute('trgLang', $arguments['target_locale']);
+        $xliff->setAttribute('srcLang', $sourceLocale);
+        $xliff->setAttribute('trgLang', $targetLocale);
 
         $file = $xliff->appendChild($dom->createElement('file'));
-        $file->setAttribute('id', $arguments['file_id'] ?? 'f1');
+        $file->setAttribute('id', $fileId);
 
         $id = 0;
         foreach ($translations as $source => $target) {

@@ -13,14 +13,13 @@ abstract class FileDumper implements Dumper
      * 
      * @param array $translations
      * @param string $path
-     * @param array $arguments
      * @return static
      */
-    public function dump(array $translations, string $path, array $arguments = [])
+    public function dump(array $translations, string $path)
     {
         $this->ensurePathExists($path);
 
-        $content = $this->format($translations, $arguments);
+        $content = $this->format($translations, ...array_slice(func_get_args(), 2));
 
         $this->dumpFile($content, $path);
 
@@ -34,7 +33,7 @@ abstract class FileDumper implements Dumper
      * @throws \Alnaggar\Muhawil\Exceptions\ResourceNotFoundException
      * @return void
      */
-    protected function ensurePathExists(string $path) : void
+    protected function ensurePathExists(string $path): void
     {
         $directory = dirname($path);
 
@@ -46,7 +45,7 @@ abstract class FileDumper implements Dumper
         } catch (\Exception $e) {
             $eMessage .= ": {$e->getMessage()}";
         } finally {
-            if (! $isDirExists) {
+            if (!$isDirExists) {
                 throw new ResourceNotFoundException($eMessage);
             }
         }
@@ -56,10 +55,9 @@ abstract class FileDumper implements Dumper
      * Formats the translations into their storable format.
      * 
      * @param array $translations
-     * @param array $arguments
      * @return string
      */
-    abstract public function format(array $translations, array $arguments = []) : string;
+    abstract public function format(array $translations): string;
 
     /**
      * Dump translations formated string into the specified file.
@@ -69,7 +67,7 @@ abstract class FileDumper implements Dumper
      * @throws \Alnaggar\Muhawil\Exceptions\ResourceDumpException
      * @return void
      */
-    protected function dumpFile(string $content, string $path) : void
+    protected function dumpFile(string $content, string $path): void
     {
         $isDumped = false;
         $eMessage = "Cannot write to the file located at '{$path}'";

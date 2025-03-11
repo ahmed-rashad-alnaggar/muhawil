@@ -2,20 +2,23 @@
 
 namespace Alnaggar\Muhawil\Dumpers;
 
+/**
+ * @method $this dump() dump(array $translations, string $path, bool $dry = true) Dump translations into the specified YAML file.
+ */
 class YamlFileDumper extends FileDumper
 {
     /**
      * Formats translations into a storable YAML representation.
      *
      * @param array $translations
-     * @param array $arguments
+     * @param bool $dry
      * @return string
      */
-    public function format(array $translations, array $arguments = []) : string
+    public function format(array $translations, bool $dry = true): string
     {
         $output = '';
 
-        if ($arguments['dry'] ?? true) {
+        if ($dry) {
             [$arrs, $hashes] = $this->getArraysAndHashes($translations);
             [$anchors, $merges] = $this->getAnchorsAndMerges($arrs, $hashes);
 
@@ -37,13 +40,13 @@ class YamlFileDumper extends FileDumper
      * @param array $hashes
      * @return array
      */
-    protected function getArraysAndHashes(array $translations, array &$arrs = [], array &$hashes = []) : array
+    protected function getArraysAndHashes(array $translations, array &$arrs = [], array &$hashes = []): array
     {
         foreach ($translations as $translation) {
             if (is_array($translation)) {
                 $arrs[] = $translation;
 
-                if (! in_array($translation, $hashes, true)) {
+                if (!in_array($translation, $hashes, true)) {
                     $hash = md5(json_encode($translation));
                     $hashes[$hash] = $translation;
                 }
@@ -62,15 +65,15 @@ class YamlFileDumper extends FileDumper
      * @param array $hashes
      * @return array
      */
-    protected function getAnchorsAndMerges(array $arrs, array $hashes) : array
+    protected function getAnchorsAndMerges(array $arrs, array $hashes): array
     {
         $anchors = [];
         $merges = [];
 
-        while (! empty($arrs)) {
+        while (!empty($arrs)) {
             $arr = array_shift($arrs);
 
-            if (! in_array($arr, $anchors, true)) {
+            if (!in_array($arr, $anchors, true)) {
                 $isAnchor = false;
                 $anchorName = count($anchors) + 1;
 
@@ -101,7 +104,7 @@ class YamlFileDumper extends FileDumper
                 }
 
                 if ($isAnchor) {
-                    if (! in_array($arr, $anchors, true)) {
+                    if (!in_array($arr, $anchors, true)) {
                         $anchors[$anchorName] = $arr;
                     }
                 }
@@ -122,7 +125,7 @@ class YamlFileDumper extends FileDumper
      * @param int $indentLevel
      * @return string
      */
-    protected function formatTranslations(array $translations, array $anchors = [], array $merges = [], array $hashes = [], array &$anchored = [], int $indentLevel = 0) : string
+    protected function formatTranslations(array $translations, array $anchors = [], array $merges = [], array $hashes = [], array &$anchored = [], int $indentLevel = 0): string
     {
         $output = '';
         $indent = str_repeat('  ', $indentLevel);
@@ -176,7 +179,7 @@ class YamlFileDumper extends FileDumper
      * @param string $value
      * @return string
      */
-    protected function formatValue(string $value) : string
+    protected function formatValue(string $value): string
     {
         return '"' . addcslashes($value, "\0..\37\42\134") . '"';
     }
@@ -188,7 +191,7 @@ class YamlFileDumper extends FileDumper
      * @param array $anchors
      * @return string
      */
-    protected function reAnchor(string $formatted, array $anchors) : string
+    protected function reAnchor(string $formatted, array $anchors): string
     {
         $anchorId = 0;
 
@@ -196,7 +199,7 @@ class YamlFileDumper extends FileDumper
             // The pattern is adjusted for use in the sprintf function.
             $pattern = '/^( *)((?:"(?:[^"\x5c]|\x5c.)+")|(?:\'(?:[^\']+(?:\'\'[^\']*)*)\')|(?:[^\-?:,\[\]\{\}#&*!|>\'"%%@`]+)):[ \t]+(?:%s%s)/m';
 
-            if (! preg_match(sprintf($pattern, '\*', $anchor), $formatted)) {
+            if (!preg_match(sprintf($pattern, '\*', $anchor), $formatted)) {
                 $formatted = preg_replace(sprintf($pattern, '&', $anchor), '$1$2:', $formatted);
             } else {
                 $formatted = preg_replace(sprintf($pattern, '(&|\*)', $anchor), '$1$2: $3anchor_' . ++$anchorId, $formatted);

@@ -10,7 +10,7 @@ trait HasPluralForms
      * @param string $locale
      * @return string
      */
-    protected function getPluralForms(string $language) : string
+    protected function getPluralForms(string $language): string
     {
         $language = str_replace('-', '_', $language);
         $language = strstr($language, '_', true) ?: $language;

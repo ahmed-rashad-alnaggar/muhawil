@@ -3,7 +3,7 @@
 namespace Alnaggar\Muhawil\Interfaces;
 
 /**
- * @method array load() load(...$parameters) Retrieve translations from the storage.
+ * @method array load() load() Retrieve translations from the storage.
  */
 interface Loader
 {
